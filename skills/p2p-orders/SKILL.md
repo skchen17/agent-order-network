@@ -18,7 +18,9 @@ node "<skill>/scripts/orders.mjs" <tool_name> --input <JSON文件或-> --config 
 
 需要 Node.js 24+ 和配套运行时依赖；仓库内用 npm ci，独立包内用 npm --prefix "<skill>/runtime" ci --omit=dev。执行从任意工作目录都可以；JSON 文件使用绝对路径，避免拼接用户文字进 shell。一次调用只返回一个 JSON 对象到 stdout，警告在 stderr；失败检查 ok:false 和退出码，不循环重试写入。
 
-公开查询使用无私钥的 deployment.json。发布／报价／付款使用操作者自己的专用测试钱包配置，工具读取密钥；不要把密钥读入模型上下文、对话或订单。仅支持31337本地开发链与明确配置的84532 Base Sepolia测试网；主网禁用。钱包配置与运行记录不属于可分发Skill内容。
+公开查询使用无私钥的 deployment.json。发布／报价／付款使用操作者自己的签名配置：本地/测试网可用专用测试钱包，Base 主网 8453 必须使用外部签名器模块并拒绝明文私钥。不要把密钥读入模型上下文、对话或订单。默认支持 31337 与 84532；Base 主网为显式 `allowMainnet` + USDC 的 Phase 1 路径，未审计，真实资金须满足仓库中的主网就绪门槛。钱包配置与运行记录不属于可分发Skill内容。
+
+Base 主网 8453 + USDC 的外部签名器接口、命令和风险见 [references/mainnet.md](references/mainnet.md)。在审计和 readiness gates 关闭前不得用于真实资金。
 
 链上查询也需要写入本地索引缓存。用 --state-dir 指定当前宿主可写的持久目录；默认是当前工作目录内按部署和钱包隔离的 .agent-tools 子目录，不再写到公共配置旁。该参数是命令行选项，不放入工具的 JSON 输入。交易、恢复和唤醒必须使用同一个持久目录；同一钱包保持一个写入执行者，不通过换目录绕过未决动作。
 

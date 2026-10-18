@@ -11,8 +11,11 @@ export class TradeSession {
   constructor(agent) { this.agent = agent; }
   context() {
     const c = this.agent.config;
-    return { chainId: c.chainId, contract: c.contract, paymentToken: c.paymentToken, address: c.address, deploymentId: c.deploymentId };
+    return { chainId: c.chainId, contract: c.contract, paymentToken: c.paymentToken, address: c.address, deploymentId: c.deploymentId,
+      paymentSymbol: c.paymentSymbol ?? "TESTUSD", paymentDecimals: Number(c.paymentDecimals ?? 6),
+      testOnly: c.testOnly !== false, realFunds: c.environment === "public-mainnet" };
   }
+  decimals() { return Number(this.agent.config.paymentDecimals ?? 6); }
   proposal(kind, data) {
     const ticket = plain({ kind, context: this.context(), expiresAt: Date.now() + 300000, data });
     return { ticket, approval: digest(ticket) };
@@ -26,7 +29,7 @@ export class TradeSession {
     if (order.taskType === DEMAND_TYPE) {
       demand = (await this.agent.payloads.readJSON(order.inputURI)).value;
       validateDraft(demand, true);
-      if (parseUnits(demand.budget, 6) !== BigInt(order.maxPrice)) throw new Error("Demand/escrow budget mismatch");
+      if (parseUnits(demand.budget, this.decimals()) !== BigInt(order.maxPrice)) throw new Error("Demand/escrow budget mismatch");
     }
     return { orderId: String(orderId), status: STATUS[Number(order.status)], order, demand };
   }
@@ -34,12 +37,12 @@ export class TradeSession {
   async preparePublish(draft) {
     this.role("buyer"); validateDraft(draft, true);
     const { agent: a } = this;
-    if (a.config.maxOrderAmount && parseUnits(draft.budget, 6) > BigInt(a.config.maxOrderAmount)) throw new Error("Order exceeds this pilot's per-order test-token limit");
+    if (a.config.maxOrderAmount && parseUnits(draft.budget, this.decimals()) > BigInt(a.config.maxOrderAmount)) throw new Error("Order exceeds this deployment's per-order payment limit");
     const now = await a.now();
     const request = { requestId: id(draft.draftId), taskType: DEMAND_TYPE,
       description: `${draft.title}\n${draft.objective}`,
       acceptanceCriteria: "买方人工确认；完整要求、条件及交付约定见 inputURI。验收期满无异议可结算；争议由约定评估方裁定，裁定超时退款买方。",
-      maxPrice: parseUnits(draft.budget, 6).toString(), acceptUntil: now + draft.acceptHours * 3600,
+      maxPrice: parseUnits(draft.budget, this.decimals()).toString(), acceptUntil: now + draft.acceptHours * 3600,
       latestDeliveryAt: now + draft.deliveryHours * 3600, reviewPeriod: draft.reviewHours * 3600,
       arbitrationPeriod: draft.arbitrationHours * 3600, evaluator: a.config.evaluator };
     return this.proposal("publish", { draft, request, disclosure: "原始描述和全部条款将公开，无法撤回历史记录。发布不锁货款，仍消耗gas。条款不能自动执行全部现实条件。" });
@@ -83,10 +86,10 @@ export class TradeSession {
             const cached = index.db.prepare("SELECT document FROM demand_documents WHERE uri=?").get(order.inputURI);
             const demand = cached ? JSON.parse(cached.document) : (await a.payloads.readJSON(order.inputURI)).value;
             validateDraft(demand, true);
-            if (parseUnits(demand.budget, 6) !== BigInt(order.maxPrice)) throw new Error("Demand/escrow budget mismatch");
+            if (parseUnits(demand.budget, this.decimals()) !== BigInt(order.maxPrice)) throw new Error("Demand/escrow budget mismatch");
             if (!cached) index.db.prepare("INSERT OR REPLACE INTO demand_documents VALUES (?,?)").run(order.inputURI, JSON.stringify(demand));
             const result = matchDemand(demand, order, capabilities, now);
-            const item = { orderId: key, title: demand.title, budget: formatUnits(order.maxPrice, 6), deadline: Number(order.latestDeliveryAt), ...result };
+            const item = { orderId: key, title: demand.title, budget: formatUnits(order.maxPrice, this.decimals()), deadline: Number(order.latestDeliveryAt), ...result };
             if (result.matched) matched.push(item); else excluded.push({ orderId: key, reasons: result.rejected });
           } catch (error) { unreadable.push({ orderId: key, reason: error.message }); }
         }
@@ -104,7 +107,7 @@ export class TradeSession {
 
   async prepareQuote(orderId, { price, hours }) {
     this.role("seller");
-    if (!/^(?:0|[1-9]\d{0,11})(?:\.\d{1,6})?$/.test(price) || parseUnits(price, 6) <= 0n || !Number.isInteger(hours) || hours < 1 || hours > 720) throw new Error("Invalid quote price or delivery hours");
+    if (!/^(?:0|[1-9]\d{0,11})(?:\.\d{1,6})?$/.test(price) || parseUnits(price, this.decimals()) <= 0n || !Number.isInteger(hours) || hours < 1 || hours > 720) throw new Error("Invalid quote price or delivery hours");
     const view = await this.order(orderId); if (!view.demand) throw new Error("Use the complex demand profile");
     const now = await this.agent.now();
     return this.proposal("quote", { ...view, price, deliverBy: now + hours * 3600, validUntil: Math.min(now + 3600, Number(view.order.acceptUntil)),
@@ -118,7 +121,7 @@ export class TradeSession {
     for (const signed of all) {
       try {
         await this.checkQuote(view.order, signed, now);
-        valid.push({ ...plain(signed), amount: formatUnits(signed.quote.price, 6), digest: digest(plain(signed)), remainingSeconds: Number(signed.quote.validUntil) - now });
+        valid.push({ ...plain(signed), amount: formatUnits(signed.quote.price, this.decimals()), digest: digest(plain(signed)), remainingSeconds: Number(signed.quote.validUntil) - now });
       } catch { /* Expired, incompatible or already-funded quotes cannot be selected. */ }
     }
     return { ...view, quotes: valid };
@@ -258,7 +261,7 @@ export class TradeSession {
     }
     if (kind === "publish") {
       validateDraft(data.draft, true);
-      if (a.config.maxOrderAmount && parseUnits(data.draft.budget, 6) > BigInt(a.config.maxOrderAmount)) throw new Error("Order exceeds this pilot wallet's configured per-order test-token limit");
+      if (a.config.maxOrderAmount && parseUnits(data.draft.budget, this.decimals()) > BigInt(a.config.maxOrderAmount)) throw new Error("Order exceeds this wallet's configured per-order payment limit");
       const existing = await contract.orderForRequest(a.config.address, data.request.requestId);
       if (existing !== 0n) throw new Error(`This draft is already published as order ${existing}; cancel and create a new draft to change terms`);
       if (Number(data.request.acceptUntil) <= await a.now()) throw new Error("Recruitment window expired");
@@ -267,14 +270,14 @@ export class TradeSession {
       return this.order(orderId);
     }
     if (kind === "quote") {
-      const signed = await a.client.quote(data.orderId, { price: parseUnits(data.price, 6), deliverBy: data.deliverBy, validUntil: data.validUntil });
+      const signed = await a.client.quote(data.orderId, { price: parseUnits(data.price, this.decimals()), deliverBy: data.deliverBy, validUntil: data.validUntil });
       await a.client.postQuote(signed); return { orderId: data.orderId, quote: plain(signed) };
     }
     if (kind === "fund") {
       const signed = data.selected;
       await this.checkQuote(data.order, signed, await a.now());
       if (data.order.buyer.toLowerCase() !== a.config.address.toLowerCase()) throw new Error("Wrong buyer");
-      const maximum = parseUnits(data.demand.budget, 6);
+      const maximum = parseUnits(data.demand.budget, this.decimals());
       if (BigInt(signed.quote.price) > maximum) throw new Error("Quote exceeds user budget");
       if (a.config.maxOrderAmount && BigInt(signed.quote.price) > BigInt(a.config.maxOrderAmount)) throw new Error("Payment exceeds pilot per-order limit");
       await this.transact("approve_token", a.token, "approve", [a.config.contract, signed.quote.price]);

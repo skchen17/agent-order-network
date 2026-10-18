@@ -102,9 +102,16 @@ export async function callAgentTool(tool, input, { configFile, stateDir, approva
         return await inbox.poll();
       } finally { inbox.close(); }
     }
-    if (tool === "network_info") return { ...session.context(), configuredAddress: config.address ?? null, localOnly: agent.policy.local, testOnly: true,
-      environment: config.environment, confirmations: agent.policy.confirmations, role: config.role ?? "public-reader", publicDiscoveryNeedsWallet: false, protocolFee: "0", paymentUnit: "TESTUSD (6 decimals; valueless test token)",
-      limitations: ["test networks only", "no production key isolation", "review silence can pay provider", "arbitration timeout refunds buyer"] };
+    if (tool === "network_info") {
+      const context = session.context();
+      return { ...context, configuredAddress: config.address ?? null, localOnly: agent.policy.local, mainnet: agent.policy.mainnet,
+        testOnly: context.testOnly, realFunds: context.realFunds, environment: config.environment, confirmations: agent.policy.confirmations,
+        role: config.role ?? "public-reader", publicDiscoveryNeedsWallet: false, protocolFee: "0",
+        paymentUnit: `${context.paymentSymbol} (${context.paymentDecimals} decimals; ${context.realFunds ? "real funds" : "valueless test token"})`,
+        limitations: context.realFunds
+          ? ["unaudited contracts", "USDC freeze/pause risk", "no production key isolation", "review silence can pay provider", "arbitration timeout refunds buyer"]
+          : ["test networks only", "no production key isolation", "review silence can pay provider", "arbitration timeout refunds buyer"] };
+    }
     if (tool === "list_orders") return await session.listOrders(input);
     if (tool === "get_order") return await session.order(input.orderId);
     if (tool === "get_delivery") {

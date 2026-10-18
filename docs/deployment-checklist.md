@@ -2,6 +2,8 @@
 
 This checklist takes a clean checkout to a verified Base Sepolia pilot deployment and the first two-device trade. It does not cover mainnet or real funds.
 
+> For Base mainnet + USDC, use [mainnet deployment checklist](mainnet-deployment-checklist.md) and do not proceed until every gate in [mainnet readiness](mainnet-readiness.md) is closed.
+
 ## 0. Preconditions
 
 - Node.js 24+, npm, and a terminal.

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import solc from "solc";
 
-const files = ["contracts/OrderNetwork.sol", "contracts/OrderPayloads.sol", "contracts/test/MockPaymentToken.sol", "contracts/test/PilotPaymentToken.sol"];
+const files = ["contracts/OrderNetwork.sol", "contracts/OrderPayloads.sol", "contracts/test/MockPaymentToken.sol", "contracts/test/PilotPaymentToken.sol", "contracts/test/MockUSDC.sol"];
 const sources = Object.fromEntries(await Promise.all(files.map(async file => [file, { content: await readFile(file, "utf8") }])));
 const input = {
   language: "Solidity", sources,

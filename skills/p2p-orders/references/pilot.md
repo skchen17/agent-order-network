@@ -1,6 +1,6 @@
 # 陌生参与者接入与跨设备测试网试点
 
-当前公共试点只开放Base Sepolia（84532）；TESTUSD是无价值、无美元兑付关系的测试资产。主网禁用，每单默认上限2 TESTUSD。公开链上全部订单和交付均公开；试点只用可公开的小型文档、资料整理和源码检查任务。
+本文件描述 Base Sepolia（84532）测试网试点；TESTUSD 是无价值、无美元兑付关系的测试资产。Base 主网 8453 + USDC 是显式 `allowMainnet`、外部签名器、未审计的 Phase 1 路径，默认拒绝，详见 [mainnet.md](mainnet.md)；真实资金须满足主网就绪门槛。测试网每单默认上限 2 TESTUSD。公开链上全部订单和交付均公开；试点只用可公开的小型文档、资料整理和源码检查任务。
 
 ## 参与者由自己的Agent接入
 
@@ -54,3 +54,23 @@ deploy完成后先运行verify：它只读核验链ID、部署区块哈希、确
 只分发public/deployment.json、public/invitation.txt、指纹与匹配Skill构建。deployer/evaluator钱包、deployment.actions.sqlite、participant钱包、会话日志和调度绑定均不分发。部署完成后无需部署者节点、API、账户、索引或调度服务器；参与者仍依赖自己的宿主、RPC、gas和定时检查。
 
 评估方不会自动裁定。试点双方必须接受已披露的无异议结算与争议超时退款规则；不要把新生成的评估地址宣传为已有人值守的仲裁服务。
+
+## Base 主网 + USDC（Phase 1，未审计）
+
+Base 主网 8453 需要显式 `--allow-mainnet`、外部签名器模块和 canonical USDC。主网写入拒绝明文私钥；没有 faucet/claim，参与者使用自己的真实 ETH 和 USDC。`deploy` 只部署 OrderNetwork + OrderPayloads，不部署测试支付币。主网默认拒绝，且当前未经审计，真实资金必须满足仓库中的主网就绪门槛。
+
+```text
+node "<skill>/scripts/pilot.mjs" prepare --mainnet --out "<目录>" --address "<deployer>" --evaluator "<evaluator>" --signer-module "<绝对路径>" --max-order-amount 2000000
+node "<skill>/scripts/pilot.mjs" deploy --wallet "<目录>/deployer.json" --out "<目录>/public" --allow-mainnet
+node "<skill>/scripts/pilot.mjs" verify --deployment "<目录>/public/deployment.json" --allow-mainnet
+node "<skill>/scripts/pilot.mjs" invite --deployment "<目录>/public/deployment.json" --out "<目录>/public/invitation.txt" --allow-mainnet
+```
+
+参与者加入：
+
+```text
+node "<skill>/scripts/pilot.mjs" join --deployment "<deployment.json>" --fingerprint "<fingerprint>" --role buyer|seller --address "<自己的地址>" --signer-module "<绝对路径>" --allow-mainnet --out "<新目录>"
+node "<skill>/scripts/pilot.mjs" doctor --config "<目录>/config.json" --state-dir "<目录>/state"
+```
+
+完整外部签名器接口、USDC 冻结/暂停风险和 Phase 2/3 门槛见 [mainnet.md](mainnet.md)。

@@ -15,7 +15,7 @@
 
 </div>
 
-> **Developer preview.** v0.6 is feature-frozen. Real funds are out of scope and mainnet is disabled. Public testnet deployment and real cross-device trading are not yet verified. Read [Known limitations](docs/known-limitations.md) before using anything here.
+> **Developer preview.** v0.6 is feature-frozen. Real funds are not approved. Base mainnet tooling is opt-in and unaudited; no mainnet transaction has been sent. Public testnet deployment and real cross-device trading are not yet verified. Read [Known limitations](docs/known-limitations.md) and [Mainnet readiness](docs/mainnet-readiness.md) before using anything here.
 
 ## What this is
 
@@ -35,8 +35,8 @@ Orders and public terms live in smart contracts. Quotes, escrow, delivery, and s
 | | |
 | --- | --- |
 | Integration | `p2p-orders` Skill + one-shot JSON tools |
-| Networks | Local `31337` and Base Sepolia `84532` test-only |
-| Payment | `TESTUSD`, a valueless 6-decimal test token |
+| Networks | Local `31337`, Base Sepolia `84532` testnet, and opt-in Base mainnet `8453` with USDC (unaudited; real-funds gates apply) |
+| Payment | `TESTUSD` on testnets; canonical Base USDC on mainnet |
 | Order model | Public orders, EIP-712 signed quotes, escrow, bounded disputes |
 | Host verified | Codex CLI on one machine; Claude and other hosts are not yet verified |
 | License | MIT |
@@ -141,7 +141,7 @@ examples/         example demand, capabilities, and invitation template
 | Inbox and wake | Durable event inbox, deadline reminders, one-shot local adapter, and receipt verification in the original Codex session |
 | Standalone onboarding | Test identities, invitation verification, doctor, explicit Base Sepolia configuration, deploy/claim tooling, and evidence export |
 
-Out of scope for v0.6: a mandatory proprietary client, a business token, mainnet, production custody, cross-product plug-and-play, bulk-search promises, and expanded automated acceptance.
+Out of scope for v0.6: a mandatory proprietary client, a business token, mainnet real-funds operation (the opt-in Phase 1 tooling is not approval), production custody, cross-product plug-and-play, bulk-search promises, and expanded automated acceptance.
 
 ## Validation status
 
@@ -150,10 +150,11 @@ Out of scope for v0.6: a mandatory proprietary client, a business token, mainnet
 | Local complete trade, recovery, inbox, and wake | Verified |
 | Two real Codex sessions trading on one machine | Verified |
 | New-session onboarding and original-session wake | Verified |
-| Base Sepolia public deployment | Pending test gas |
+| Base Sepolia public deployment | Not performed; tooling ready |
 | Two physical devices | Not yet verified |
 | Claude or other host compatibility | Not yet verified |
-| Mainnet or real funds | Disabled |
+| Base mainnet tooling | Phase 1 only; no deployment; unaudited |
+| Mainnet real funds | Not approved until readiness gates close |
 
 The automated demo uses fixtures for requirement understanding, authorization, and delivery. It does not measure model quality or cross-host behavior.
 
@@ -164,7 +165,7 @@ The automated demo uses fixtures for requirement understanding, authorization, a
 - Escrow is a single ERC-20 per deployment. A balance-delta check rejects fee-on-transfer tokens. Credits are tracked per order, and withdrawals are scoped to listed orders or an atomic all-balance amount plus version.
 - The approval digest binds exact content, but **is not cryptographic proof of human consent**. The host must enforce the user's real authorization.
 - Orders and deliveries are public and hard to retract. Do not put secrets or sensitive personal data on-chain.
-- The contracts are **unaudited** and cannot be patched in place. Do not use real funds. See [SECURITY.md](SECURITY.md).
+- The contracts are **unaudited** and cannot be patched in place. Base mainnet is opt-in, requires an external signer, and has no deployment yet; do not use real funds until the [readiness gates](docs/mainnet-readiness.md) close. See [SECURITY.md](SECURITY.md).
 
 ## Known limitations
 
@@ -183,6 +184,8 @@ Read the full [Known limitations](docs/known-limitations.md).
 | [Recovery and wake](skills/p2p-orders/references/recovery.md) | Receipts, recovery, inbox, schedulers | Chinese |
 | [Real-session validation](docs/codex-live-trial.md) | Codex trial observations | Chinese |
 | [Deployment checklist](docs/deployment-checklist.md) | Base Sepolia deploy, verify, invite, and drills | English |
+| [Mainnet readiness](docs/mainnet-readiness.md) | Base mainnet + USDC trust assumptions, risks, and gates | English |
+| [Mainnet deployment checklist](docs/mainnet-deployment-checklist.md) | Phase 1 dry run, Phase 2 gates, Phase 3 pilot | English |
 | [Pilot runbook](docs/pilot-runbook.md) | Optional public-testnet pilot | Chinese |
 | [Changelog](CHANGELOG.md) | Version history | Chinese |
 

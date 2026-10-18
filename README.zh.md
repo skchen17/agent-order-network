@@ -8,6 +8,8 @@
 
 **v0.6 已冻结功能，定位为开发者预览，不开放真实资金。** 本地完整交易、两个真实 Codex 会话交易，以及新会话接入和原会话唤醒已有验证；公共测试网部署、实际跨设备交易和其他宿主兼容性尚未验证。详见[已知限制](docs/known-limitations.md)。
 
+Base 主网 8453 + USDC 的 Phase 1 工具已加入，但默认关闭、要求外部签名器、未经审计，且尚未执行任何主网交易。真实资金必须满足[主网就绪门槛](docs/mainnet-readiness.md)。
+
 ## 安装与一键自测
 
 需要 Node.js 24+、npm 和终端。首次安装需要访问 npm；默认自测不需要模型账号、钱包、测试 gas 或公共 RPC。
@@ -54,7 +56,7 @@ node "<Skill目录>/scripts/orders.mjs" schema
 | 待办与唤醒 | 持久事件收件箱、截止提醒、一次性本地适配器；Codex 原会话收件核验 |
 | 独立接入准备 | 测试身份、邀请核验、doctor、显式 Base Sepolia 配置、部署/领取工具和证据导出 |
 
-范围外：必选自有客户端、业务代币、主网、生产托管、跨产品即装即用、海量检索承诺和自动验收扩展。v0.6 收尾仅接受阻断性修复与文档纠正。
+范围外：必选自有客户端、业务代币、主网真实资金运营（Phase 1 工具不代表主网已获批准）、生产托管、跨产品即装即用、海量检索承诺和自动验收扩展。v0.6 收尾仅接受阻断性修复与文档纠正。
 
 ## 文档
 
@@ -64,6 +66,7 @@ node "<Skill目录>/scripts/orders.mjs" schema
 - [恢复与唤醒](skills/p2p-orders/references/recovery.md)
 - [真实会话验证](docs/codex-live-trial.md) · [版本记录](CHANGELOG.md)
 - [部署清单（English）](docs/deployment-checklist.md)
+- [主网就绪说明（English）](docs/mainnet-readiness.md) · [主网部署清单（English）](docs/mainnet-deployment-checklist.md)
 - [后续可选公共测试网试点](docs/pilot-runbook.md)，不属于本次预览版完成条件
 
 公开版只保留 v0.6 的 Skill、合约、pilot、恢复/唤醒和核心测试；旧的 trade CLI、确定性 agents、网页采集示例及对应测试/文档已移除。

@@ -12,14 +12,14 @@
 | exclusions, conditions | 明确不做、特殊情况处理数组 |
 | acceptance, questions | 确认交付依据、待澄清问题数组 |
 | language, format | 语言、格式标签 |
-| budget | 正 TESTUSD 十进制字符串，最多六位小数 |
+| budget | 支付资产十进制字符串（测试网 TESTUSD；Base 主网 USDC，6 位小数），必须为正 |
 | acceptHours | 发布后招募窗口，整数1..168小时 |
 | deliveryHours | 从发布起总交付期限，须大于招募窗口且<=720小时 |
 | reviewHours, arbitrationHours | 检查／争议等待期，整数1..168小时 |
 
 工具补充 profile、draftId、createdAt、generator=host-agent，并保留原文。未知字符串为空、数组为空、小时为0并用 questions 表达问题。返回 missing 指示缺项。修改时保留 draftId，重新发布同一身份不会创建第二单。改变已经发布的条款需取消并使用新草稿身份。
 
-字符串、列表长度和总字节量受本地校验限制；schema 输出完整类型定义。预算是测试支付资产，不代表美元兑换或其他币种；不得由 Agent 自行换算。条件分支是双方交易约定，现有合约只支持一笔锁款、一次交付、全额放款或退款；不支持自动分期、部分退款或由文本触发付款。
+字符串、列表长度和总字节量受本地校验限制；schema 输出完整类型定义。预算是当前部署的支付资产（测试网 TESTUSD 或 Base 主网 USDC），不代表美元兑换或其他币种；不得由 Agent 自行换算。条件分支是双方交易约定，现有合约只支持一笔锁款、一次交付、全额放款或退款；不支持自动分期、部分退款或由文本触发付款。
 
 ## 一次性 JSON 工具
 
@@ -75,4 +75,4 @@ execute_action统一返回actionId、action、executionStatus、receipts和repla
 
 Codex／Claude 等产品在 Skill 安装、执行权限及运行时方面可能不同，不能因使用相同 SKILL.md 就声称已完成跨产品互通。当前尚未在 Claude 或其他独立宿主实测。参考：[OpenAI Skills](https://developers.openai.com/plugins/concepts/skills)、[Claude Agent Skills](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)。本 Skill 不预设所谓 dot 的产品接口。
 
-本地测试运行仓库的npm run local:network；公共试点使用pilot.mjs部署和接入明确的Base Sepolia测试网，见[pilot.md](pilot.md)。主网禁用；公共试点至少3个区块确认并校验合约代码和签名域。项目方不需要常驻应用、模型、账号、撮合或目录服务；参与者仍消耗自己的宿主资源，依赖RPC、测试gas和截止监控。
+本地测试运行仓库的npm run local:network；公共试点使用pilot.mjs部署和接入明确的Base Sepolia测试网，见[pilot.md](pilot.md)。Base 主网 8453 + USDC 仅在显式 `allowMainnet`、外部签名器和主网就绪门槛下使用，见[mainnet.md](mainnet.md)；默认拒绝，当前未审计。公共测试网至少3个区块确认并校验合约代码和签名域。项目方不需要常驻应用、模型、账号、撮合或目录服务；参与者仍消耗自己的宿主资源，依赖RPC、gas和截止监控。

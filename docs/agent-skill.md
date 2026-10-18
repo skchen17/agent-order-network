@@ -61,7 +61,9 @@ watch_orders登记订单／新需求及提醒窗口；poll_updates补扫离线�
 
 使用[首次接入指南](../skills/p2p-orders/references/pilot.md)及[试点执行流程](pilot-runbook.md)。pilot脚本负责prepare、join、doctor、deploy、claim、bind-codex、status及export-evidence。新钱包从本机生成，工具不把私钥读入模型；公开邀请只包含部署信息和指纹，不包含钱包、私有RPC令牌或宿主认证。
 
-公共网络限定Base Sepolia 84532和无价值TESTUSD；每单默认上限2 TESTUSD，领取支付测试币直接调用测试合约，不依赖发起者发币服务器。各方仍需从外部官方列示水龙头领取自己的测试gas。部署检查使用构建运行时代码、不可变字段掩码、代码哈希及签名域；RPC可换，部署指纹不变。
+公共测试网限定Base Sepolia 84532和无价值TESTUSD；每单默认上限2 TESTUSD，领取支付测试币直接调用测试合约，不依赖发起者发币服务器。各方仍需从外部官方列示水龙头领取自己的测试gas。部署检查使用构建运行时代码、不可变字段掩码、代码哈希及签名域；RPC可换，部署指纹不变。
+
+Base 主网 8453 + USDC 的 Phase 1 工具要求显式 `--allow-mainnet`、外部签名器模块和 canonical USDC；默认拒绝，当前未审计，不执行真实资金。见[主网就绪说明](mainnet-readiness.md)和[主网部署清单](mainnet-deployment-checklist.md)。
 
 Codex适配器只恢复明确绑定的会话，要求turn.completed、准确的全部eventIds和持久收件记录后才确认待办；exit0本身不足。只读唤醒不会交易，attention由用户自己的Agent呈现。导出的调度命令由参与者接入自己的定时器，没有项目方调度服务。当前公共RPC只读验证通过，实际公共部署等待测试gas，真实跨设备交易也待验收。
 

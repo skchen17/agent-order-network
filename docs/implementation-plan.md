@@ -53,7 +53,7 @@ v0.6延续“用户已有宿主Agent + Skill + 协议工具”，加入外部参
 
 已实现pilot命令：prepare生成新专用测试身份；join校验公开邀请并生成参与者自己的钱包；doctor提供可行动预检；deploy记录及恢复三笔固定合约部署；claim让每人从测试合约领取无价值支付资产；bind-codex绑定明确原会话及生成本地调度命令；status展示诊断和待办；export-evidence只导出白名单证据。
 
-Base Sepolia 84532已加入显式testOnly白名单，主网仍禁用。公共配置校验构建运行时代码、部署区块、代码指纹及EIP-712签名域，至少3个区块确认；恢复和提醒游标遵循确认深度。公开清单不带部署者自选RPC令牌。每单默认上限2 TESTUSD。
+Base Sepolia 84532已加入显式testOnly白名单；本文记录时主网仍禁用。当前 Phase 1 新增显式 opt-in 的 Base 主网 8453 + USDC 工具，默认拒绝、要求外部签名器、未审计，见 mainnet-readiness.md。公共配置校验构建运行时代码、部署区块、代码指纹及EIP-712签名域，至少3个区块确认；恢复和提醒游标遵循确认深度。公开清单不带部署者自选RPC令牌。每单默认上限2 TESTUSD。
 
 真实模型试跑：新真实 Codex 会话完成独立接入、doctor、关注及恢复原会话读链，1 条事件确认，钱包 nonce、托管与 credits 均为 0。脱敏观察见[codex-live-trial.md](codex-live-trial.md)。同机夹具链，不是公共网或跨设备证明。
 

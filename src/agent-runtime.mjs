@@ -1,10 +1,11 @@
 import { readFile, writeFile, mkdir, rename } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
-import { JsonRpcProvider, Wallet, NonceManager, Contract, VoidSigner, ZeroAddress } from "ethers";
+import { Contract, ZeroAddress } from "ethers";
 import { OrderClient } from "./order-client.mjs";
 import { PayloadClient } from "./payload-client.mjs";
-import { networkPolicy, verifyRuntime, createProvider } from "./networks.mjs";
+import { networkPolicy, verifyRuntime, createProvider, readTokenMetadata, ERC20_ABI } from "./networks.mjs";
+import { resolveSigner } from "./signers.mjs";
 
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 export const json = value => JSON.stringify(value, (_, item) => typeof item === "bigint" ? item.toString() : item, 2);
@@ -28,7 +29,7 @@ export async function recoverStateRace(agent, orderId, observedStatus, error) {
   const latest = await agent.client.contract.getOrder(orderId);
   if (Number(latest.status) === observedStatus) throw error;
   // A concurrent on-chain transition may invalidate gas estimation. Refresh the local nonce too.
-  agent.signer.reset();
+  agent.signer.reset?.();
   progress(agent.config.role, "state_changed_retry", { orderId: orderId.toString() });
 }
 
@@ -58,23 +59,33 @@ export async function connectAgent(role, values) {
   }
   const policy = networkPolicy(config);
   if (config.role !== role) throw new Error("Role-specific configuration required");
-  const provider = createProvider(config);
+  const provider = (values.providerFactory ?? createProvider)(config);
   try {
     if (BigInt(await provider.send("eth_chainId", [])) !== BigInt(config.chainId)) throw new Error("Wrong chain");
     const deploymentBlock = await provider.getBlock(config.deploymentBlock);
     if (deploymentBlock?.hash !== config.deploymentBlockHash) throw new Error("Deployment changed; use a new config and state directory");
-    const wallet = values.readOnly ? new VoidSigner(config.address, provider) : new Wallet(config.privateKey, provider);
-    if (wallet.address.toLowerCase() !== config.address.toLowerCase()) throw new Error("Wallet identity mismatch");
-    const signer = values.readOnly ? wallet : new NonceManager(wallet);
+    const signer = await resolveSigner(config, provider, { readOnly: values.readOnly });
     const artifact = await readJSON(new URL("../artifacts/OrderNetwork.json", import.meta.url));
-    const tokenArtifact = await readJSON(new URL(`../artifacts/${policy.local ? "MockPaymentToken" : "PilotPaymentToken"}.json`, import.meta.url));
+    const externalToken = config.paymentTokenSource === "external";
+    const tokenArtifact = externalToken
+      ? { abi: ERC20_ABI }
+      : await readJSON(new URL(`../artifacts/${policy.local ? "MockPaymentToken" : "PilotPaymentToken"}.json`, import.meta.url));
     const client = new OrderClient(config.contract, artifact.abi, signer);
     if ((await client.contract.paymentToken()).toLowerCase() !== config.paymentToken.toLowerCase()) throw new Error("Wrong payment asset");
     const token = new Contract(config.paymentToken, tokenArtifact.abi, signer);
+    if (externalToken) {
+      const metadata = await readTokenMetadata(provider, config.paymentToken);
+      if (config.paymentSymbol && metadata.symbol !== config.paymentSymbol) throw new Error("Wrong payment symbol");
+      if (config.paymentDecimals !== undefined && metadata.decimals !== Number(config.paymentDecimals)) throw new Error("Wrong payment decimals");
+      if (metadata.decimals !== 6) throw new Error("This build supports 6-decimal payment assets; Base USDC is 6 decimals");
+    }
     const payloadArtifact = await readJSON(new URL("../artifacts/OrderPayloads.json", import.meta.url));
     if (!policy.local) {
       if (!config.codeHashes || !config.payloadStore) throw new Error("Verified public deployment descriptor required");
-      for (const [key, address, build] of [["contract", config.contract, artifact], ["paymentToken", config.paymentToken, tokenArtifact], ["payloadStore", config.payloadStore, payloadArtifact]]) {
+      const checks = [["contract", config.contract, artifact], ["payloadStore", config.payloadStore, payloadArtifact]];
+      if (!externalToken) checks.push(["paymentToken", config.paymentToken, tokenArtifact]);
+      for (const [key, address, build] of checks) {
+        if (!config.codeHashes[key]) throw new Error(`Missing deployment code hash for ${key}`);
         if (await verifyRuntime(provider, address, build) !== config.codeHashes[key]) throw new Error("Deployment code fingerprint changed");
       }
       const domain = await client.contract.eip712Domain();

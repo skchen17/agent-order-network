@@ -1,5 +1,14 @@
 # 版本记录
 
+## 未发布 — Base 主网 Phase 1（2026-10-18）
+
+- 新增显式 opt-in 的 Base 主网 8453 profile 与 canonical USDC 元数据；默认仍拒绝主网。
+- 新增外部签名器模块接口；主网写入拒绝明文私钥。
+- 部署流程支持已有 USDC，仅部署 OrderNetwork + OrderPayloads。
+- verify/invite/join/doctor 支持主网与 USDC，并输出未审计、冻结/暂停和真实资金警告。
+- 新增 mainnetTest 模拟链测试、主网就绪说明和分阶段部署清单。
+- 本阶段未发送任何主网交易；真实资金仍受 Phase 2/3 门槛限制。
+
 ## 未发布 — 部署工具增强（2026-10-18）
 
 - 新增 `pilot verify`：只读核验链 ID、部署区块哈希、确认深度、运行时代码、支付资产、签名域和浏览器链接。
