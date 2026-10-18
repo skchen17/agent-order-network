@@ -182,6 +182,7 @@ Read the full [Known limitations](docs/known-limitations.md).
 | [Tool protocol](docs/agent-tools.md) | Tool inputs, outputs, and authorization | Chinese |
 | [Recovery and wake](skills/p2p-orders/references/recovery.md) | Receipts, recovery, inbox, schedulers | Chinese |
 | [Real-session validation](docs/codex-live-trial.md) | Codex trial observations | Chinese |
+| [Deployment checklist](docs/deployment-checklist.md) | Base Sepolia deploy, verify, invite, and drills | English |
 | [Pilot runbook](docs/pilot-runbook.md) | Optional public-testnet pilot | Chinese |
 | [Changelog](CHANGELOG.md) | Version history | Chinese |
 

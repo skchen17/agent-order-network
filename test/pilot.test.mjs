@@ -2,10 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { BrowserProvider, Contract, parseEther } from "ethers";
 import hre from "hardhat";
 import { BASE_SEPOLIA, networkPolicy, verifyRuntime } from "../src/networks.mjs";
-import { preparePilot, deployPilot, publicDeployment, deploymentFingerprint, bindCodex } from "../src/pilot.mjs";
+import { preparePilot, deployPilot, verifyPilot, invitePilot, publicDeployment, deploymentFingerprint, bindCodex } from "../src/pilot.mjs";
 import { readJSON, saveJSON } from "../src/agent-runtime.mjs";
 
 test("testnet allowlist rejects mainnets, wrong profiles and insufficient confirmation depth", () => {
@@ -56,6 +57,23 @@ test("public deployment workflow is restartable on simulated 84532, pins code, a
   assert.equal(again.receipts.length, 3); assert.equal(again.fingerprint, deployed.fingerprint);
   const network = new Contract(manifest.contract, (await readJSON(new URL("../artifacts/OrderNetwork.json", import.meta.url))).abi, provider);
   assert.equal(await network.orderCount(), 0n);
+
+  for (let i = 0; i < 5; i++) await connection.provider.request({ method: "evm_mine", params: [] });
+  const verified = await verifyPilot(deployed.deploymentFile, undefined, { providerFactory: factory });
+  assert.equal(verified.ready, true);
+  assert.equal(verified.fingerprint, deployed.fingerprint);
+  assert.equal(verified.contracts.orders.toLowerCase(), manifest.contract.toLowerCase());
+  assert.ok(verified.checks.every(check => check.ok));
+  assert.equal(verified.transactionsSent, 0);
+
+  const invitationFile = path.join(directory, "public", "invitation.txt");
+  const invited = await invitePilot(deployed.deploymentFile, invitationFile);
+  assert.equal(invited.fingerprint, deployed.fingerprint);
+  const invitation = await readFile(invitationFile, "utf8");
+  assert.ok(invitation.includes(deployed.fingerprint));
+  assert.ok(invitation.includes(manifest.contract));
+  assert.ok(!invitation.includes("privateKey"));
+  await assert.rejects(invitePilot(deployed.deploymentFile, invitationFile), /exists/);
 });
 
 test("session binding is explicit, local, and exports a scheduler command without installing a task", async () => {

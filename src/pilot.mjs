@@ -1,5 +1,5 @@
 import path from "node:path";
-import { mkdir, open, unlink, access } from "node:fs/promises";
+import { mkdir, open, unlink, access, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -15,6 +15,11 @@ const build = name => readJSON(new URL(`../artifacts/${name}.json`, import.meta.
 const manifestKeys = ["environment", "network", "testOnly", "chainId", "rpcUrl", "confirmations", "deploymentId", "contract", "paymentToken", "payloadStore", "evaluator", "deploymentBlock", "deploymentBlockHash", "codeHashes", "protocolVersion", "maxOrderAmount", "indexBlockSpan"];
 export const publicDeployment = source => Object.fromEntries(manifestKeys.filter(k => source[k] !== undefined).map(k => [k, source[k]]));
 export const deploymentFingerprint = source => digest(Object.fromEntries(Object.entries(publicDeployment(source)).filter(([k]) => k !== "rpcUrl")));
+const validManifest = deployment =>
+  ["contract", "paymentToken", "payloadStore", "evaluator"].every(key => isAddress(deployment[key] ?? "") && deployment[key] !== ZeroAddress) &&
+  Number.isSafeInteger(deployment.deploymentBlock) && deployment.deploymentBlock >= 0 &&
+  /^0x[0-9a-f]{64}$/i.test(deployment.deploymentBlockHash ?? "") &&
+  deployment.codeHashes && ["contract", "paymentToken", "payloadStore"].every(key => /^0x[0-9a-f]{64}$/i.test(deployment.codeHashes[key] ?? ""));
 async function newDirectory(directory) {
   const target = path.resolve(directory);
   await mkdir(path.dirname(target), { recursive: true });
@@ -237,6 +242,168 @@ export async function exportPilotEvidence(participantFile, outputFile) {
   return { outputFile: path.resolve(outputFile), actions: report.actions.length, keysExported: false, modelTranscriptsExported: false };
 }
 
+export async function verifyPilot(deploymentFile, rpcUrl, { providerFactory = providerFor } = {}) {
+  const source = await readJSON(deploymentFile);
+  const deployment = publicDeployment(source);
+  if (rpcUrl) deployment.rpcUrl = rpcUrl;
+  const policy = networkPolicy(deployment);
+  const fingerprint = deploymentFingerprint(deployment);
+  const checks = [];
+  const add = (name, ok, next, detail) => checks.push({
+    name, ok, ...(ok || !next ? {} : { next }), ...(detail === undefined ? {} : { detail })
+  });
+  add("manifest", validManifest(deployment), "Use the public deployment.json produced by pilot deploy, not a preparation or wallet file");
+  add("fingerprint", !source.fingerprint || source.fingerprint === fingerprint,
+    "The manifest fingerprint does not match its contents; verify the invitation out of band");
+  if (!validManifest(deployment)) return { ready: false, fingerprint, checks, transactionsSent: 0 };
+
+  const provider = providerFactory(deployment);
+  try {
+    const chainId = BigInt(await provider.send("eth_chainId", []));
+    add("chain-id", chainId === BigInt(deployment.chainId), "Connect to the RPC for the manifest chain");
+    const block = await provider.getBlock(deployment.deploymentBlock);
+    add("deployment-block", block?.hash === deployment.deploymentBlockHash,
+      "The deployment block hash changed; do not use this manifest",
+      { number: deployment.deploymentBlock, hash: block?.hash ?? null });
+    const latest = await provider.getBlock("latest");
+    const depth = latest.number - deployment.deploymentBlock + 1;
+    add("confirmations", depth >= policy.confirmations, `Wait for ${policy.confirmations} confirmations`,
+      { depth, required: policy.confirmations });
+
+    const artifacts = {
+      contract: await build("OrderNetwork"),
+      paymentToken: await build("PilotPaymentToken"),
+      payloadStore: await build("OrderPayloads")
+    };
+    const actualHashes = {};
+    let codeOk = true;
+    for (const key of ["contract", "paymentToken", "payloadStore"]) {
+      try {
+        actualHashes[key] = await verifyRuntime(provider, deployment[key], artifacts[key]);
+        if (actualHashes[key] !== deployment.codeHashes[key]) codeOk = false;
+      } catch {
+        actualHashes[key] = null;
+        codeOk = false;
+      }
+    }
+    add("code-hashes", codeOk, "The runtime code does not match this Skill build or the manifest",
+      { expected: deployment.codeHashes, actual: actualHashes });
+
+    const contract = new Contract(deployment.contract, artifacts.contract.abi, provider);
+    const token = new Contract(deployment.paymentToken, artifacts.paymentToken.abi, provider);
+    let linkedToken = null;
+    try { linkedToken = await contract.paymentToken(); } catch { /* reported as a failed check */ }
+    add("payment-token-link", linkedToken?.toLowerCase() === deployment.paymentToken.toLowerCase(),
+      "OrderNetwork does not use the manifest payment token", { linkedToken });
+
+    let domain = null;
+    try { domain = await contract.eip712Domain(); } catch { /* reported as a failed check */ }
+    add("signing-domain", Boolean(domain) && domain.name === "AgentOrderNetwork" && domain.version === "1" &&
+      domain.chainId === BigInt(deployment.chainId) &&
+      domain.verifyingContract?.toLowerCase() === deployment.contract.toLowerCase(),
+      "The contract signing domain does not match the manifest",
+      { name: domain?.name ?? null, version: domain?.version ?? null, chainId: domain?.chainId?.toString?.() ?? null, verifyingContract: domain?.verifyingContract ?? null });
+
+    let symbol = null, decimals = null;
+    try { [symbol, decimals] = await Promise.all([token.symbol(), token.decimals()]); } catch { /* reported below */ }
+    add("payment-asset", decimals === 6n, "The Skill assumes a 6-decimal payment token",
+      { symbol, decimals: decimals?.toString?.() ?? null });
+
+    const explorer = {
+      contract: `${BASE_SEPOLIA.explorer}/address/${deployment.contract}`,
+      paymentToken: `${BASE_SEPOLIA.explorer}/address/${deployment.paymentToken}`,
+      payloadStore: `${BASE_SEPOLIA.explorer}/address/${deployment.payloadStore}`
+    };
+    return {
+      ready: checks.every(check => check.ok), fingerprint, network: deployment.network, chainId: deployment.chainId,
+      confirmations: policy.confirmations, deploymentBlock: deployment.deploymentBlock, latestBlock: latest.number, depth,
+      contracts: { orders: deployment.contract, paymentToken: deployment.paymentToken, payloadStore: deployment.payloadStore },
+      evaluator: deployment.evaluator, explorer, checks, codeHashes: actualHashes, transactionsSent: 0
+    };
+  } finally { provider.destroy(); }
+}
+
+export async function invitePilot(deploymentFile, outputFile) {
+  const source = await readJSON(deploymentFile);
+  const deployment = publicDeployment(source);
+  const policy = networkPolicy(deployment);
+  if (!validManifest(deployment)) throw new Error("Deployment manifest is incomplete; use the public deployment.json produced by pilot deploy");
+  const fingerprint = deploymentFingerprint(deployment);
+  if (source.fingerprint && source.fingerprint !== fingerprint) throw new Error("Deployment fingerprint mismatch; do not distribute this invitation");
+
+  const target = path.resolve(outputFile);
+  await mkdir(path.dirname(target), { recursive: true });
+  const text = `# Agent Order Network — Base Sepolia pilot invitation
+
+This is an invitation to a test-only peer-to-peer order pilot. TESTUSD has no value and no USD redemption. Never send mainnet assets.
+
+## Deployment
+
+- Network: ${deployment.network} (chainId ${deployment.chainId})
+- Protocol: ${deployment.protocolVersion ?? "0.6.0"}
+- OrderNetwork: ${deployment.contract}
+- Payment token: TESTUSD (6 decimals)
+- Payload store: ${deployment.payloadStore}
+- Evaluator: ${deployment.evaluator} (offline by default; arbitration timeout refunds the buyer)
+- Deployment block: ${deployment.deploymentBlock}
+- Deployment block hash: ${deployment.deploymentBlockHash}
+- Required confirmations: ${policy.confirmations}
+- Fingerprint: ${fingerprint}
+
+Verify this fingerprint out of band with the inviter before joining. Use only the attached public deployment file (${path.basename(deploymentFile)}); never accept a wallet, private key, or participant config from someone else.
+
+## What you need
+
+- The matching p2p-orders Skill package.
+- The public deployment.json attached to this invitation.
+- Your own host with Node.js 24+, a writable persistent state directory, and an RPC endpoint.
+- Your own buyer or seller intent. Do not reuse another participant's wallet or state directory.
+
+## Join and check
+
+\`\`\`text
+node "<skill>/scripts/pilot.mjs" join --deployment "<deployment.json>" --fingerprint "${fingerprint}" --role buyer|seller --out "<new participant directory>"
+node "<skill>/scripts/pilot.mjs" doctor --config "<participant directory>/config.json" --state-dir "<participant directory>/state"
+\`\`\`
+
+If test gas is missing, show only your new public address and the official Base Sepolia funds guide. Never buy test tokens or send mainnet funds. A buyer with test gas can claim 100 valueless TESTUSD once:
+
+\`\`\`text
+node "<skill>/scripts/pilot.mjs" claim --config "<participant directory>/config.json" --state-dir "<participant directory>/state"
+\`\`\`
+
+## Rules
+
+- Testnet only. TESTUSD has no value.
+- Orders and deliveries are public. Use only small public tasks; never put secrets or personal data on-chain.
+- Review silence can pay the provider; arbitration timeout refunds the buyer.
+- There is no automatic arbitrator. The evaluator is offline by default.
+- Deadlines continue while your host is offline. Run your own scheduler and keep the state directory.
+- The approval digest binds content but is not proof of human consent. Keep your own authorization boundary.
+- Never share wallets, private keys, session logs, or state directories.
+
+## Verify the deployment
+
+\`\`\`text
+node "<skill>/scripts/pilot.mjs" verify --deployment "<deployment.json>"
+\`\`\`
+
+The verify command checks the chain ID, deployment block hash, confirmation depth, runtime code hashes, payment token link, signing domain, and 6-decimal payment asset.`;
+
+  try {
+    await writeFile(target, text, { flag: "wx", mode: 0o644 });
+  } catch (error) {
+    if (error.code === "EEXIST") throw new Error("Invitation file already exists; choose a new --out path");
+    throw error;
+  }
+  return {
+    fingerprint, outFile: target, network: deployment.network, chainId: deployment.chainId,
+    contract: deployment.contract, paymentToken: deployment.paymentToken, evaluator: deployment.evaluator,
+    deploymentBlock: deployment.deploymentBlock, transactionsSent: 0,
+    next: "Share this invitation, the public deployment.json, and the matching Skill package. Never share wallets, private keys, or state directories."
+  };
+}
+
 export async function runPilot(argv = process.argv.slice(2), { output = process.stdout,
   skillDirectory = fileURLToPath(new URL("../skills/p2p-orders", import.meta.url)) } = {}) {
   try {
@@ -246,6 +413,8 @@ export async function runPilot(argv = process.argv.slice(2), { output = process.
     const command = positionals[0]; let result;
     if (command === "prepare" && values.out) result = await preparePilot(values.out, values.rpc);
     else if (command === "deploy" && values.wallet && values.out) result = await deployPilot(values.wallet, values.out);
+    else if (command === "verify" && values.deployment) result = await verifyPilot(values.deployment, values.rpc);
+    else if (command === "invite" && values.deployment && values.out) result = await invitePilot(values.deployment, values.out);
     else if (command === "join" && values.deployment && values.role && values.out) result = await joinPilot({ deploymentFile: values.deployment, role: values.role, directory: values.out, fingerprint: values.fingerprint, rpcUrl: values.rpc });
     else if (command === "doctor" && values.config && values["state-dir"]) result = await doctor(values.config, values["state-dir"]);
     else if (command === "claim" && values.config && values["state-dir"]) result = await claimPilotTokens(values.config, values["state-dir"]);
@@ -255,7 +424,7 @@ export async function runPilot(argv = process.argv.slice(2), { output = process.
       const p = await readJSON(values.participant);
       let attention = null; try { attention = await readJSON(path.join(p.stateDir, "attention.json")); } catch (error) { if (error.code !== "ENOENT") throw error; }
       result = { participantId: p.participantId, ...await doctor(p.configFile, p.stateDir), attention };
-    } else throw new Error("Use prepare --out, deploy --wallet --out, join --deployment --fingerprint --role --out, doctor/claim --config --state-dir, bind-codex --participant --session --codex, or status --participant");
+    } else throw new Error("Use prepare --out, deploy --wallet --out, verify --deployment [--rpc], invite --deployment --out, join --deployment --fingerprint --role --out, doctor/claim --config --state-dir, bind-codex --participant --session --codex, or status --participant");
     output.write(json({ ok: true, command, result }) + "\n"); return 0;
   } catch (error) {
     const message = error.code && !["ENOENT", "EEXIST"].includes(error.code) ? "RPC or transaction operation failed; inspect your local state and retry reads before any new write" : error.message;

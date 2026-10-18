@@ -43,10 +43,14 @@ status返回预检和attention：summary为最近一次真实唤醒的摘要，r
 node "<skill>/scripts/pilot.mjs" prepare --out "<新的试点目录>"
 node "<skill>/scripts/pilot.mjs" doctor --config "<试点目录>/deployer-wallet.json" --state-dir "<试点目录>/deployer-state"
 node "<skill>/scripts/pilot.mjs" deploy --wallet "<试点目录>/deployer-wallet.json" --out "<试点目录>/public"
+node "<skill>/scripts/pilot.mjs" verify --deployment "<试点目录>/public/deployment.json"
+node "<skill>/scripts/pilot.mjs" invite --deployment "<试点目录>/public/deployment.json" --out "<试点目录>/public/invitation.txt"
 ```
 
 prepare仅生成新的专用测试身份，不发送交易；缺测试gas时deploy会报告needs-test-gas。部署固定测试币、订单和载荷合约，保存每笔交易日志；再次运行先恢复检查，不自动重复部署。部署途中不换钱包、目录、构建版本或并行使用部署钱包。
 
-只分发public/deployment.json及其fingerprint与匹配Skill构建。deployer/evaluator钱包、deployment.actions.sqlite、participant钱包、会话日志和调度绑定均不分发。部署完成后无需部署者节点、API、账户、索引或调度服务器；参与者仍依赖自己的宿主、RPC、gas和定时检查。
+deploy完成后先运行verify：它只读核验链ID、部署区块哈希、确认深度、三份运行时代码、支付资产、EIP-712签名域和浏览器链接，不发送交易。再用invite生成含部署信息、指纹、接入命令和风险的公开邀请；已有邀请文件不会被覆盖。完整步骤见仓库中的 docs/deployment-checklist.md。
+
+只分发public/deployment.json、public/invitation.txt、指纹与匹配Skill构建。deployer/evaluator钱包、deployment.actions.sqlite、participant钱包、会话日志和调度绑定均不分发。部署完成后无需部署者节点、API、账户、索引或调度服务器；参与者仍依赖自己的宿主、RPC、gas和定时检查。
 
 评估方不会自动裁定。试点双方必须接受已披露的无异议结算与争议超时退款规则；不要把新生成的评估地址宣传为已有人值守的仲裁服务。

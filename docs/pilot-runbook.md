@@ -22,10 +22,12 @@
 1. 构建并分发同一版本Skill：npm ci、npm run compile、npm run package:skill。包不含钱包、模型认证和运行记录，参与者各自安装运行时依赖。
 2. 用Skill的pilot prepare生成新的专用部署身份；已有本轮身份继续使用原文件。doctor缺gas时停止，领取测试gas后再部署。
 3. 运行pilot deploy。保存三笔交易回执、代码指纹及public/deployment.json；进程中断时保留目录，重新执行先恢复检查，不能换钱包或目录盲目重发。
-4. 对照公共浏览器核对合约，分发公开清单、fingerprint及对应Skill包。私人RPC放在部署者自己的钱包配置；公开清单使用公共RPC，不带RPC令牌。
-5. 部署后可关闭部署电脑。链上测试支付资产由参与者自己claim，不依赖发起者在线。评估方不是自动有人值守的服务；如试点未安排双方认可的人工评估方，明确采用原有争议超时退款规则。
+4. 运行pilot verify --deployment public/deployment.json，核对链ID、部署区块、确认深度、运行时代码、支付资产和签名域；ready为true后再分发。verify不发送交易。
+5. 运行pilot invite --deployment public/deployment.json --out public/invitation.txt，生成含指纹和接入步骤的公开邀请。已有邀请文件不会被覆盖。
+6. 对照公共浏览器核对合约，分发公开清单、邀请文件、fingerprint及对应Skill包。私人RPC放在部署者自己的钱包配置；公开清单使用公共RPC，不带RPC令牌。
+7. 部署后可关闭部署电脑。链上测试支付资产由参与者自己claim，不依赖发起者在线。评估方不是自动有人值守的服务；如试点未安排双方认可的人工评估方，明确采用原有争议超时退款规则。
 
-[Agent接入命令](../skills/p2p-orders/references/pilot.md)供参与者自己的Agent执行，不要求参与者手写JSON或链上命令。
+完整命令、预期结果和异常停止条件见[部署清单](deployment-checklist.md)。[Agent接入命令](../skills/p2p-orders/references/pilot.md)供参与者自己的Agent执行，不要求参与者手写JSON或链上命令。
 
 ## 2. 每名参与者的接入
 
