@@ -11,7 +11,7 @@ npm ci
 npm run preview:verify
 ```
 
-2. Decide the deployer address, evaluator address, and external signer module. The signer module must implement `createSigner({ provider, options, role, address })` and return an ethers-compatible signer. Use KMS, HSM, or a hardware wallet; do not put a private key in the config.
+2. Decide the deployer address, evaluator address, and external signer module. Copy [examples/signers/template.mjs](../examples/signers/template.mjs) outside the repository and implement `createSigner({ provider, options, role, address })` for your KMS, HSM, or hardware wallet. Do not put a private key in the config. Review [deployer responsibilities](deployer-responsibilities.md) first.
 
 3. Generate the deployer config:
 

@@ -67,6 +67,7 @@ node "<Skill目录>/scripts/orders.mjs" schema
 - [真实会话验证](docs/codex-live-trial.md) · [版本记录](CHANGELOG.md)
 - [部署清单（English）](docs/deployment-checklist.md)
 - [主网就绪说明（English）](docs/mainnet-readiness.md) · [主网部署清单（English）](docs/mainnet-deployment-checklist.md)
+- [部署方责任清单（English）](docs/deployer-responsibilities.md) · [外部签名器模板](examples/signers/template.mjs)
 - [后续可选公共测试网试点](docs/pilot-runbook.md)，不属于本次预览版完成条件
 
 公开版只保留 v0.6 的 Skill、合约、pilot、恢复/唤醒和核心测试；旧的 trade CLI、确定性 agents、网页采集示例及对应测试/文档已移除。

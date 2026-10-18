@@ -4,6 +4,12 @@
 
 The repository now contains opt-in Base mainnet support for USDC. It is deliberately gated: mainnet is rejected unless the manifest/config sets `allowMainnet: true`; `prepare` requires `--mainnet`, and `deploy`, `join`, `verify`, and `invite` require `--allow-mainnet`. Plaintext private keys are rejected on mainnet; an external signer module is required.
 
+## Responsibility boundary
+
+The repository provides code, interfaces, tests, and warnings. It does not custody funds, operate servers, or manage keys. If you deploy with real funds, you are the deployer/operator: audit, legal/compliance, KMS/HSM/hardware signing, monitoring, backups, and evaluator operations are your responsibility. See [deployer responsibilities](deployer-responsibilities.md).
+
+The repository includes [an external signer template](../examples/signers/template.mjs) and a local/testnet-only file signer example. Neither is a production key-management service.
+
 ## What Phase 1 provides
 
 - `BASE_MAINNET` profile: chain ID `8453`, BaseScan explorer, 10 confirmations, canonical USDC.
