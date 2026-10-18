@@ -469,7 +469,7 @@ export async function invitePilot(deploymentFile, outputFile, { allowMainnet = f
 
   const target = path.resolve(outputFile);
   await mkdir(path.dirname(target), { recursive: true });
-  const mainnetText = `# Agent Order Network — Base mainnet USDC invitation
+  const mainnetText = `# OrderPact — Base mainnet USDC invitation
 
 **Real funds. Unaudited. Do not proceed until the mainnet readiness gates are met.**
 
@@ -525,7 +525,7 @@ node "<skill>/scripts/pilot.mjs" verify --deployment "<deployment.json>" --allow
 \`\`\`
 `;
 
-  const testnetText = `# Agent Order Network — Base Sepolia pilot invitation
+  const testnetText = `# OrderPact — Base Sepolia pilot invitation
 
 This is an invitation to a test-only peer-to-peer order pilot. ${deployment.paymentSymbol ?? "TESTUSD"} has no value and no USD redemption. Never send mainnet assets.
 

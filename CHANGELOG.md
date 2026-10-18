@@ -1,5 +1,11 @@
 # 版本记录
 
+## 未发布 — 品牌更名为 OrderPact（2026-10-18）
+
+- 项目品牌从 Agent Order Network 更名为 OrderPact（订单契约）。
+- 更新 README、包名、文档标题、邀请文案和 logo 标题。
+- 保留链上 EIP-712 域名 `AgentOrderNetwork`、合约名 `OrderNetwork`/`OrderPayloads` 和 Skill 目录 `p2p-orders`，避免破坏既有部署与接入。
+
 ## 未发布 — AWS KMS 签名器示例（2026-10-18）
 
 - 新增 `examples/signers/aws-kms.mjs`：从 KMS 公钥派生并钉扎地址，签交易、EIP-712 和消息，DER 解析与 yParity 恢复。

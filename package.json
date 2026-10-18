@@ -1,9 +1,9 @@
 {
-  "name": "agent-order-network",
+  "name": "orderpact",
   "version": "0.6.0",
   "private": true,
   "type": "module",
-  "description": "Developer preview: Skill-first peer-to-peer on-chain orders for existing agents",
+  "description": "OrderPact: Skill-first peer-to-peer on-chain orders for existing agents",
   "engines": {
     "node": ">=24.0.0"
   },

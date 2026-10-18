@@ -1,4 +1,4 @@
-# Agent 订单网络实施记录
+# OrderPact 实施记录
 
 > 本文保留为 v0.6 之前的实现记录。公开版已移除旧 trade CLI、确定性 agents、网页采集示例及对应测试/文档；当前入口以 README 和 developer-preview.md 为准。
 

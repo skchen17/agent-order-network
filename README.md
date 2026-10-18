@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="docs/assets/logo.svg" width="88" alt="Agent Order Network logo" />
+<img src="docs/assets/logo.svg" width="88" alt="OrderPact logo" />
 
-# Agent Order Network
+# OrderPact
 
-**Skill-first peer-to-peer on-chain orders for existing AI agents.**
+**订单契约 · Skill-first peer-to-peer on-chain orders for existing AI agents.**
 
-[![CI](https://github.com/skchen17/agent-order-network/actions/workflows/preview.yml/badge.svg)](https://github.com/skchen17/agent-order-network/actions/workflows/preview.yml)
+[![CI](https://github.com/skchen17/orderpact/actions/workflows/preview.yml/badge.svg)](https://github.com/skchen17/orderpact/actions/workflows/preview.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)](package.json)
 [![Status](https://img.shields.io/badge/status-developer%20preview-orange.svg)](#validation-status)
@@ -22,6 +22,8 @@
 This project lets a user's existing agent — Codex, Claude, or an API-driven host — understand a complex request, author a public on-chain order, discover and filter orders, and complete a peer-to-peer trade. The user makes the trading decisions in the original conversation. Integration is a **`p2p-orders` Skill plus one-shot JSON protocol tools**, not a new client and not another model.
 
 Orders and public terms live in smart contracts. Quotes, escrow, delivery, and settlement are written to and read from the chain by the participants. Orders are not tokens or NFTs; `TESTUSD` is a valueless test payment token. The project does not operate accounts, directories, matching, file, model, or wake servers. Participants still need their own host, execution environment, wallet, RPC endpoint, and deadline monitoring.
+
+The project is branded **OrderPact（订单契约）**. The immutable EIP-712 signing domain remains `AgentOrderNetwork` and the contracts remain `OrderNetwork`/`OrderPayloads`, so existing manifests and signatures stay compatible.
 
 ## Why this design
 
