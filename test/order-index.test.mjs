@@ -4,8 +4,10 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { id } from "ethers";
 import { createLocalChain } from "../scripts/local-chain.mjs";
-import { OrderClient, WEB_EXTRACT_V1 } from "../src/order-client.mjs";
+import { OrderClient } from "../src/order-client.mjs";
 import { OrderIndex } from "../src/order-index.mjs";
+
+const TASK_TYPE = id("test.order.v1");
 
 async function setup(t) {
   const chain = await createLocalChain(); t.after(() => chain.close());
@@ -17,12 +19,12 @@ async function setup(t) {
     async getOrder(...args) { calls.reads++; return chain.network.getOrder(...args); }
   } };
   const file = path.resolve(".local-demo", "index-tests", randomUUID(), "orders.sqlite");
-  const options = { client: indexedClient, deploymentBlock: 0, identity: await chain.network.getAddress(), taskTypes: [WEB_EXTRACT_V1], blockSpan: 2 };
+  const options = { client: indexedClient, deploymentBlock: 0, identity: await chain.network.getAddress(), taskTypes: [TASK_TYPE], blockSpan: 2 };
   let index = await OrderIndex.open(file, options);
   t.after(() => index.close());
   const now = await chain.now();
   async function publish(patch = {}) {
-    return client.publish({ requestId: id(randomUUID()), taskType: WEB_EXTRACT_V1, description: "Product extraction", inputURI: "fixture://product",
+    return client.publish({ requestId: id(randomUUID()), taskType: TASK_TYPE, description: "Test task", inputURI: "fixture://task",
       acceptanceCriteria: "match snapshot", maxPrice: 2_000_000n, acceptUntil: now + 600, latestDeliveryAt: now + 1200,
       reviewPeriod: 60, arbitrationPeriod: 60, evaluator: await chain.evaluator.getAddress(), ...patch });
   }
@@ -80,7 +82,7 @@ test("SQLite filters large candidate sets exactly without bigint rounding or sta
   for (let i = 1; i <= 5000; i++) {
     const budget = (10n ** 24n + BigInt(i)).toString();
     const order = { id: String(i), evaluator, maxPrice: budget };
-    insert.run(String(i), WEB_EXTRACT_V1, "buyer", 0, 2000, budget, JSON.stringify(order));
+    insert.run(String(i), TASK_TYPE, "buyer", 0, 2000, budget, JSON.stringify(order));
   }
   c.index.db.exec("COMMIT");
   const top = c.index.candidates({ now: 1000, minBudget: 10n ** 24n + 4990n, allowedEvaluators: [evaluator], limit: 3 });

@@ -1,5 +1,7 @@
 # Agent 订单网络实施记录
 
+> 本文保留为 v0.6 之前的实现记录。公开版已移除旧 trade CLI、确定性 agents、网页采集示例及对应测试/文档；当前入口以 README 和 developer-preview.md 为准。
+
 **v0.6 已冻结为开发者预览。** 下文保留实现记录；当前范围与收尾标准见[开发者预览指南](developer-preview.md)，公共网和跨设备不作为本版完成条件。
 
 v0.6延续“用户已有宿主Agent + Skill + 协议工具”，加入外部参与者独立接入、明确的公共测试网支持、真实原会话唤醒及试点流程。自建客户端、本地模型、采集和自动验收仍为可选。当前公共链部署等待测试gas；实际跨设备交易未验收，不使用真实资金。
@@ -18,7 +20,7 @@ v0.6延续“用户已有宿主Agent + Skill + 协议工具”，加入外部参
 | P3 | 公共测试网及资金准备 | 确认深度、报价重组、钱包并发、通知、独立审查和更公平争议机制 |
 | 按需 | 自动验收与更多抓取模板 | 暂缓扩展，不能挤占需求表达、发现和确认主流程 |
 
-主入口：skills/p2p-orders/SKILL.md，node scripts/agent-tools.mjs schema。自动回放 npm run demo:skill；分发 npm run package:skill。详见 agent-skill.md。npm run trade 和 demo:user 保留调试，不再要求用户配置另一套模型。
+主入口：skills/p2p-orders/SKILL.md，node scripts/agent-tools.mjs schema。自动回放 npm run demo:skill；分发 npm run package:skill。详见 agent-skill.md。旧的 trade/demo:user 调试入口已在公开版移除。
 
 ## 当前实现
 

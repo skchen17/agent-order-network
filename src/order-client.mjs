@@ -1,4 +1,4 @@
-import { Contract, id } from "ethers";
+import { Contract } from "ethers";
 import { scanEvents } from "./log-scan.mjs";
 
 export const QUOTE_TYPES = {
@@ -80,5 +80,3 @@ export class OrderClient {
     return this.transact ? this.transact(step, this.contract, method, args) : (await this.contract[method](...args)).wait();
   }
 }
-
-export const WEB_EXTRACT_V1 = id("web.extract.product.v1");

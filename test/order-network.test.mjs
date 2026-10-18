@@ -2,7 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { ContractFactory, id, keccak256, toUtf8Bytes, ZeroHash } from "ethers";
 import { createLocalChain } from "../scripts/local-chain.mjs";
-import { OrderClient, WEB_EXTRACT_V1, QUOTE_TYPES } from "../src/order-client.mjs";
+import { OrderClient, QUOTE_TYPES } from "../src/order-client.mjs";
+
+const TASK_TYPE = id("test.order.v1");
 
 async function fixture(t) {
   const c = await createLocalChain();
@@ -11,9 +13,9 @@ async function fixture(t) {
   c.sellerClient = new OrderClient(await c.network.getAddress(), c.artifact.abi, c.seller);
   const now = await c.now();
   c.request = {
-    requestId: id("request-1"), taskType: WEB_EXTRACT_V1,
-    description: "Extract product price from a supplied snapshot", inputURI: "fixture://product.html",
-    acceptanceCriteria: "Match the supplied snapshot and web.extract.product.v1 schema",
+    requestId: id("request-1"), taskType: TASK_TYPE,
+    description: "Perform the test task", inputURI: "fixture://task",
+    acceptanceCriteria: "Match the test task criteria",
     maxPrice: 2_000_000n, acceptUntil: now + 600, latestDeliveryAt: now + 1200,
     reviewPeriod: 60, arbitrationPeriod: 60, evaluator: await c.evaluator.getAddress()
   };
@@ -57,7 +59,7 @@ test("public order retains full terms and can be discovered without an applicati
   assert.equal(order.acceptanceCriteria, c.request.acceptanceCriteria);
   assert.equal(order.status, 0n);
   assert.notEqual(order.termsHash, ZeroHash);
-  const found = await c.sellerClient.discover(WEB_EXTRACT_V1);
+  const found = await c.sellerClient.discover(TASK_TYPE);
   assert.deepEqual(found.map(item => item.orderId), [c.orderId]);
   await rejects(c.network, () => c.network.createOrder.staticCall(c.request), "InvalidRequest");
   await rejects(c.network, () => c.network.getOrder(999), "UnknownOrder");
@@ -69,7 +71,7 @@ test("signed quote funds escrow, buyer approves, supplier withdraws exactly once
   await c.fund();
   assert.equal(await c.network.totalEscrowed(), c.signed.quote.price);
   assert.equal(await c.token.balanceOf(await c.buyer.getAddress()), start - c.signed.quote.price);
-  assert.equal((await c.sellerClient.discover(WEB_EXTRACT_V1)).length, 0);
+  assert.equal((await c.sellerClient.discover(TASK_TYPE)).length, 0);
   await c.submit();
   await (await c.network.approveResult(c.orderId)).wait();
   assert.equal((await c.network.getOrder(c.orderId)).status, 4n);

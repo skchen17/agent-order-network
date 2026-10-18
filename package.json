@@ -11,25 +11,14 @@
     "tools": "node scripts/agent-tools.mjs",
     "package:skill": "npm run compile && node scripts/package-skill.mjs",
     "demo:skill": "npm run compile && node scripts/demo-skill.mjs",
-    "trade": "node scripts/trade.mjs",
-    "demo:user": "npm run compile && node scripts/demo-user.mjs",
     "compile": "node scripts/compile.mjs",
     "test": "npm run compile && node --test --test-concurrency=1 test/*.test.mjs",
-    "demo": "npm run compile && node scripts/demo.mjs",
-    "demo:p2p": "npm run compile && node scripts/p2p-demo.mjs",
-    "test:p2p": "npm run compile && node --test --test-concurrency=1 test/p2p.test.mjs",
     "local:network": "npm run compile && node scripts/start-local.mjs",
-    "agent:buyer": "node agents/buyer.mjs",
-    "agent:seller": "node agents/seller.mjs",
-    "fetch:products": "node scripts/fetch-products.mjs",
-    "demo:live": "npm run compile && node scripts/p2p-demo.mjs --scenario live --task examples/live-products.task.json",
     "preview:verify": "npm test && node scripts/demo-skill.mjs && node scripts/package-skill.mjs"
   },
   "dependencies": {
     "@openzeppelin/contracts": "5.6.1",
-    "cheerio": "1.2.0",
-    "ethers": "6.17.0",
-    "ipaddr.js": "2.5.0"
+    "ethers": "6.17.0"
   },
   "devDependencies": {
     "hardhat": "3.20.0",

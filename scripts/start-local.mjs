@@ -1,7 +1,6 @@
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { randomUUID } from "node:crypto";
-import { fileURLToPath } from "node:url";
 import { JsonRpcProvider, Wallet, ContractFactory, parseEther } from "ethers";
 import hre from "hardhat";
 import { readJSON, saveJSON } from "../src/agent-runtime.mjs";
@@ -53,18 +52,15 @@ try {
     deploymentBlock: receipt.blockNumber, deploymentBlockHash: receipt.blockHash,
     pollMs: 100, deliverySeconds: 300, acceptSeconds: 600, latestDeliverySeconds: 1200,
     reviewPeriod: 120, arbitrationPeriod: 60,
-    webPolicy: { allowedHosts: ["books.toscrape.com"], maxPages: 10, timeoutMs: 15000, minIntervalMs: 1000 },
     indexBlockSpan: 500
   };
   // Each role receives only its own random development key. Public deployment has no keys.
   await saveJSON(path.join(out, "deployment.json"), { ...common, buyer: buyer.address, seller: seller.address });
   await saveJSON(path.join(out, "buyer", "config.json"), {
-    ...common, role: "buyer", address: buyer.address, privateKey: buyer.privateKey,
-    inputPath: fileURLToPath(new URL("../fixtures/product-compact.html", import.meta.url)), maxSpend: "2000000"
+    ...common, role: "buyer", address: buyer.address, privateKey: buyer.privateKey
   });
   await saveJSON(path.join(out, "seller", "config.json"), {
-    ...common, role: "seller", address: seller.address, privateKey: seller.privateKey,
-    allowedBuyer: buyer.address, price: "1500000"
+    ...common, role: "seller", address: seller.address, privateKey: seller.privateKey
   });
   const ready = { type: "ready", pid: process.pid, directory: out, ...common, buyer: buyer.address, seller: seller.address };
   console.log(JSON.stringify({ type: "ready", pid: process.pid, rpcUrl, directory: out, contract: common.contract }));

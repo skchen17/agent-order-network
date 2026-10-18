@@ -4,7 +4,6 @@ import { parseArgs } from "node:util";
 import { JsonRpcProvider, Wallet, NonceManager, Contract, VoidSigner, ZeroAddress } from "ethers";
 import { OrderClient } from "./order-client.mjs";
 import { PayloadClient } from "./payload-client.mjs";
-import { createWebFetcher } from "./safe-web.mjs";
 import { networkPolicy, verifyRuntime, createProvider } from "./networks.mjs";
 
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -83,8 +82,6 @@ export async function connectAgent(role, values) {
     }
     const payloads = config.payloadStore ? new PayloadClient({ address: config.payloadStore, abi: payloadArtifact.abi, signer,
       chainId: config.chainId, fromBlock: config.deploymentBlock }) : null;
-    const webPolicy = config.webPolicy ?? { allowedHosts: ["books.toscrape.com"], maxPages: 10 };
-    const fetchPage = createWebFetcher(webPolicy);
     const stateFile = path.resolve(values.state ?? path.join(path.dirname(values.config), "state.json"));
     let state;
     try { state = await readJSON(stateFile); } catch (error) { if (error.code !== "ENOENT") throw error; }
@@ -97,7 +94,7 @@ export async function connectAgent(role, values) {
       await saveJSON(stateFile, state);
       progress(role, event, { orderId: state.orderId, status: state.status, reason: state.reason });
     }
-    return { config, policy, values, provider, signer, client, token, payloads, webPolicy, fetchPage, state, stateFile, persist,
+    return { config, policy, values, provider, signer, client, token, payloads, state, stateFile, persist,
       async now() { return Number((await provider.getBlock("latest")).timestamp); },
       async close() { provider.destroy(); if (process.connected) process.disconnect(); }
     };

@@ -63,4 +63,8 @@ node "<Skill目录>/scripts/orders.mjs" schema
 - [真实会话验证](docs/codex-live-trial.md) · [版本记录](CHANGELOG.md)
 - [后续可选公共测试网试点](docs/pilot-runbook.md)，不属于本次预览版完成条件
 
-`trade`、`demo:user`、`demo:p2p` 和网页采集示例保留供调试，不作为 v0.6 推荐入口。仓库尚未指定整体开源许可证；源码可见不代表已授予任意再分发或商用许可，第三方依赖保留各自许可证。
+公开版只保留 v0.6 的 Skill、合约、pilot、恢复/唤醒和核心测试；旧的 trade CLI、确定性 agents、网页采集示例及对应测试/文档已移除。
+
+## 许可证
+
+MIT，详见 [LICENSE](LICENSE)。第三方依赖保留各自许可证。

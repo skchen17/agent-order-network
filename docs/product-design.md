@@ -20,7 +20,7 @@ Agent 指用户已有的 Codex、Claude 或 API 驱动的 Agent。它负责理�
 
 当前 v0.4 提供 demand.complex.v1、p2p-orders Skill、一次性 JSON 工具、公开分页发现和用户授权后执行。宿主生成结构化 terms，工具校验而不再调用另一个模型。已验证工具进程闭环；示例的理解输入、授权与交付仍为测试夹具，不代表真实研究完成或跨产品测试。
 
-早期 web.extract.product.v1 和 web.fetch.products.v1 采集模板继续保留作为可选示例；增加任务类型不应要求重写托管逻辑。
+早期 web.extract.product.v1 和 web.fetch.products.v1 采集模板已在公开版清理中移除；当前范围聚焦 demand.complex.v1。增加任务类型不应要求重写托管逻辑。
 
 ## MVP 用户流程
 
