@@ -8,7 +8,7 @@
 
 **v0.6 已冻结功能，定位为开发者预览，不开放真实资金。** 本地完整交易、两个真实 Codex 会话交易，以及新会话接入和原会话唤醒已有验证；公共测试网部署、实际跨设备交易和其他宿主兼容性尚未验证。详见[已知限制](docs/known-limitations.md)。
 
-品牌名为 OrderPact（订单契约）；链上 EIP-712 域名仍为 `AgentOrderNetwork`，合约名仍为 `OrderNetwork`/`OrderPayloads`，以兼容既有部署和签名。
+品牌名为 OrderPact（订单契约）；链上 EIP-712 域名仍为 `AgentOrderNetwork`，合约名仍为 `OrderNetwork`/`OrderPayloads`，Skill 标识仍为 `p2p-orders`，以兼容既有部署、签名和宿主接入。
 
 Base 主网 8453 + USDC 的 Phase 1 工具已加入，但默认关闭、要求外部签名器、未经审计，且尚未执行任何主网交易。真实资金必须满足[主网就绪门槛](docs/mainnet-readiness.md)。
 

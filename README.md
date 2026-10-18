@@ -23,7 +23,7 @@ This project lets a user's existing agent — Codex, Claude, or an API-driven ho
 
 Orders and public terms live in smart contracts. Quotes, escrow, delivery, and settlement are written to and read from the chain by the participants. Orders are not tokens or NFTs; `TESTUSD` is a valueless test payment token. The project does not operate accounts, directories, matching, file, model, or wake servers. Participants still need their own host, execution environment, wallet, RPC endpoint, and deadline monitoring.
 
-The project is branded **OrderPact（订单契约）**. The immutable EIP-712 signing domain remains `AgentOrderNetwork` and the contracts remain `OrderNetwork`/`OrderPayloads`, so existing manifests and signatures stay compatible.
+The project is branded **OrderPact（订单契约）**. The immutable EIP-712 signing domain remains `AgentOrderNetwork`, the contracts remain `OrderNetwork`/`OrderPayloads`, and the Skill identifier remains `p2p-orders`, so existing manifests, signatures, and host integrations stay compatible.
 
 ## Why this design
 
