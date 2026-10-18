@@ -1,33 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
   <title id="title">Agent Order Network</title>
-  <desc id="desc">Two agent nodes exchanging a signed order card.</desc>
+  <desc id="desc">Two agent arcs completing a signed order.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0B1220"/>
-      <stop offset="1" stop-color="#101B30"/>
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F1F5F9"/>
     </linearGradient>
-    <radialGradient id="tealGlow" cx="0.28" cy="0.5" r="0.55">
-      <stop offset="0" stop-color="#4FD1C5" stop-opacity="0.18"/>
-      <stop offset="1" stop-color="#4FD1C5" stop-opacity="0"/>
+    <radialGradient id="tealGlow" cx="0.3" cy="0.5" r="0.6">
+      <stop offset="0" stop-color="#14B8A6" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#14B8A6" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="amberGlow" cx="0.72" cy="0.5" r="0.55">
-      <stop offset="0" stop-color="#F6AD55" stop-opacity="0.14"/>
-      <stop offset="1" stop-color="#F6AD55" stop-opacity="0"/>
+    <radialGradient id="amberGlow" cx="0.7" cy="0.5" r="0.6">
+      <stop offset="0" stop-color="#F59E0B" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#F59E0B" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
-  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)" stroke="#1E2A40" stroke-width="2"/>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)" stroke="#E2E8F0" stroke-width="2"/>
   <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#tealGlow)"/>
   <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#amberGlow)"/>
 
-  <line x1="96" y1="128" x2="104" y2="128" stroke="#4FD1C5" stroke-width="8" stroke-linecap="round"/>
-  <line x1="152" y1="128" x2="160" y2="128" stroke="#F6AD55" stroke-width="8" stroke-linecap="round"/>
-
-  <circle cx="72" cy="128" r="24" fill="#0B1220" stroke="#4FD1C5" stroke-width="12"/>
-  <circle cx="184" cy="128" r="24" fill="#0B1220" stroke="#F6AD55" stroke-width="12"/>
-
-  <rect x="104" y="86" width="48" height="84" rx="10" fill="#F5F7FA"/>
-  <line x1="116" y1="110" x2="140" y2="110" stroke="#0B1220" stroke-width="4" stroke-linecap="round"/>
-  <line x1="116" y1="126" x2="140" y2="126" stroke="#0B1220" stroke-width="4" stroke-linecap="round"/>
-  <polyline points="116,148 124,156 140,138" fill="none" stroke="#14B8A6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M135 76.5 A52 52 0 0 1 135 179.5" fill="none" stroke="#F59E0B" stroke-width="18" stroke-linecap="round"/>
+  <path d="M121 179.5 A52 52 0 0 1 121 76.5" fill="none" stroke="#14B8A6" stroke-width="18" stroke-linecap="round"/>
+  <path d="M104 130 L120 146 L154 110" fill="none" stroke="#0F172A" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
