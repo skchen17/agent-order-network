@@ -1,0 +1,76 @@
+{
+  "version": "0.6.0",
+  "kind": "sanitized maintainer observation, not third-party audit",
+  "observedAt": "2026-10-18T04:55:08.148850+00:00",
+  "environment": {
+    "os": "Windows",
+    "node": "24.14.1",
+    "npm": "11.11.0"
+  },
+  "install": {
+    "command": "npm ci",
+    "passed": true,
+    "npmAuditReportedVulnerabilities": 0
+  },
+  "verification": {
+    "command": "npm run preview:verify",
+    "exitCode": 0,
+    "tests": 76,
+    "passed": 76,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "fullDemo": {
+    "toolCalls": 27,
+    "keylessDiscovery": true,
+    "foundOrders": [
+      "1",
+      "2"
+    ],
+    "fullTermsPreserved": true,
+    "deliveryVerified": true,
+    "status": 4,
+    "cancelledSecondOrder": 5,
+    "sellerBalance": "1500000",
+    "escrow": "0",
+    "credits": "0",
+    "localOnly": true,
+    "permanentAppServers": 0,
+    "interactiveClients": 0,
+    "localModels": 0,
+    "unifiedReceipts": true,
+    "durableWake": true,
+    "failedWakeRetained": 8,
+    "acceptedWakeEvents": 8,
+    "recoveryReadOnly": true,
+    "authorization": "simulated test authorization only",
+    "hostInference": "fixture, not Codex/Claude cross-host evaluation"
+  },
+  "skillPackage": {
+    "files": 33,
+    "containsWallets": false,
+    "containsNodeModules": false,
+    "archiveSha256": "34c8e99a2fa5ee6c7a16e5955d093f5d6731b9c84d959d697605f67a9a22f7d1",
+    "standaloneOutsideRepository": true,
+    "runtimeInstall": "npm ci --omit=dev",
+    "runtimeInstallPassed": true,
+    "schemaVersion": "0.6.0",
+    "tools": 14
+  },
+  "githubCI": {
+    "configuredPlatforms": [
+      "ubuntu-latest",
+      "windows-latest"
+    ],
+    "remoteRunVerified": false
+  },
+  "publicTestnetVerified": false,
+  "crossDeviceVerified": false,
+  "notes": [
+    "Fixture demand, authorization and delivery in automated demo; local test wake adapter, not a model test.",
+    "Historical real Codex observations are recorded separately.",
+    "No raw wallets, private session IDs, paths or model transcripts are included.",
+    "No Git commit or push performed."
+  ]
+}

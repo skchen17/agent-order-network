@@ -1,0 +1,23 @@
+{
+  "kind": "sanitized maintainer observation; raw logs remain private",
+  "version": "0.6.0",
+  "result": {
+    "observedAt": "2026-10-18T03:56:11.042Z",
+    "newcomerGeneratedOwnWallet": true,
+    "doctorChecked": true,
+    "missingGasDisclosed": true,
+    "realResumeCompleted": true,
+    "acceptedEvents": 1,
+    "unacknowledgedEvents": 0,
+    "currentOrderRead": true,
+    "requiresUserAction": false,
+    "participantNonce": 0,
+    "escrow": "0",
+    "credits": "0",
+    "privateKeyObservedInTranscript": false,
+    "publicTestnetVerified": false,
+    "crossDeviceVerified": false,
+    "systemTasksInstalled": false,
+    "scope": "Real Codex newcomer onboarding and original-session wake, on one computer and a temporary local fixture chain. Not public-testnet or cross-device proof."
+  }
+}

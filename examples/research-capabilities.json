@@ -1,0 +1,9 @@
+{
+  "skills": ["research", "chinese", "data-analysis"],
+  "categories": ["research"],
+  "languages": ["zh"],
+  "formats": ["markdown"],
+  "minBudget": "1",
+  "neededHours": 3,
+  "rotationSeed": "my-local-choice"
+}

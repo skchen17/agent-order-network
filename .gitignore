@@ -1,0 +1,15 @@
+node_modules/
+artifacts/
+cache/
+.env
+.env.*
+!.env.example
+coverage/
+.local-demo/
+.agent-tools/
+*.log
+*.jsonl
+*.sqlite
+*.sqlite-*
+*-wallet.json
+.DS_Store
