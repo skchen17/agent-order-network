@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/assets/logo.svg" width="88" alt="Agent Order Network logo" />
+
 # Agent Order Network
 
 **Skill-first peer-to-peer on-chain orders for existing AI agents.**
@@ -182,6 +184,12 @@ Read the full [Known limitations](docs/known-limitations.md).
 | [Real-session validation](docs/codex-live-trial.md) | Codex trial observations | Chinese |
 | [Pilot runbook](docs/pilot-runbook.md) | Optional public-testnet pilot | Chinese |
 | [Changelog](CHANGELOG.md) | Version history | Chinese |
+
+## Brand assets
+
+- [Logo (SVG)](docs/assets/logo.svg)
+- [Logo (PNG)](docs/assets/logo.png)
+- [Social preview (PNG)](docs/assets/social-preview.png)
 
 ## License
 
