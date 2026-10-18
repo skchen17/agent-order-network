@@ -187,6 +187,7 @@ Read the full [Known limitations](docs/known-limitations.md).
 | [Mainnet readiness](docs/mainnet-readiness.md) | Base mainnet + USDC trust assumptions, risks, and gates | English |
 | [Mainnet deployment checklist](docs/mainnet-deployment-checklist.md) | Phase 1 dry run, Phase 2 gates, Phase 3 pilot | English |
 | [Deployer responsibilities](docs/deployer-responsibilities.md) | What the project provides vs what the deployer must operate | English |
+| [AWS KMS signer](docs/aws-kms-signer.md) | Reference KMS adapter and operational notes | English |
 | [Signer template](examples/signers/template.mjs) | Reference external KMS/HSM/hardware signer module | English |
 | [Pilot runbook](docs/pilot-runbook.md) | Optional public-testnet pilot | Chinese |
 | [Changelog](CHANGELOG.md) | Version history | Chinese |

@@ -4,6 +4,9 @@
 // KMS/HSM/hardware-wallet SDK, and point config.externalSigner.module at the
 // absolute path of your copy.
 //
+// See examples/signers/aws-kms.mjs for a concrete AWS KMS implementation
+// and docs/aws-kms-signer.md for its operational notes.
+//
 // The loader in src/signers.mjs calls:
 //   createSigner({ provider, options, role, address })
 //

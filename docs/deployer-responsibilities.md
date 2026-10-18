@@ -19,7 +19,7 @@ This repository provides a protocol, a Skill, and operator tooling. It does **no
 
 - [ ] Independent audit of `OrderNetwork` and `OrderPayloads`; findings fixed and retested.
 - [ ] Legal/compliance review for your jurisdiction and the USDC use case.
-- [ ] KMS/HSM/hardware-wallet adapter implemented from [the signer template](../examples/signers/template.mjs); address pinning and signing policy tested.
+- [ ] KMS/HSM/hardware-wallet adapter implemented from [the signer template](../examples/signers/template.mjs) or [the AWS KMS example](aws-kms-signer.md); address pinning and signing policy tested.
 - [ ] Disaster-recovery drill: lost device, unavailable KMS, key rotation, nonce recovery, restored state directory.
 - [ ] Written acceptance of USDC blacklist/pause/proxy-upgrade risk and the immutable no-rescue contract.
 - [ ] RPC provider with a failover path; no credential in a public manifest.

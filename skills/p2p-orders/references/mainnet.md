@@ -33,7 +33,7 @@ export async function createSigner({ provider, options, role, address }) {
 }
 ```
 
-`options` may contain non-secret references such as a KMS key ID or hardware-wallet account path. Do not put a private key or mnemonic in the config. The repository provides `examples/signers/template.mjs` as a starting point and `docs/deployer-responsibilities.md`; neither is included in the packaged Skill and neither is a production key-management service. `examples/signers/local-file-dev.mjs` is local/testnet-only and refuses Base mainnet.
+`options` may contain non-secret references such as a KMS key ID or hardware-wallet account path. Do not put a private key or mnemonic in the config. The repository provides `examples/signers/template.mjs`, `examples/signers/aws-kms.mjs` (AWS KMS reference), and `docs/deployer-responsibilities.md`; none is included in the packaged Skill and none is a production key-management service. `examples/signers/local-file-dev.mjs` is local/testnet-only and refuses Base mainnet.
 
 ## Deployer flow
 
